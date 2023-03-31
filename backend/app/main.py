@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -24,6 +25,6 @@ def get_db():
         db.close()
 
 
-@app.get("/")
-async def hello():
-    return "Hello world"
+@app.get("/", response_model=list[schemas.Room])
+async def get_rooms(db: Session = Depends(get_db)):
+    return crud.get_rooms(db)
