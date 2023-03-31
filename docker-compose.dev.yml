@@ -49,8 +49,8 @@ services:
     networks:
       - talkanon
     volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -85,3 +85,5 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  rabbitmq_data:
+  rabbitmq_log:
