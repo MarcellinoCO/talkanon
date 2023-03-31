@@ -28,7 +28,7 @@ def get_db():
 
 
 async def get_rabbitmq_connection():
-    return await connect_robust("amqp://talkanon:talkanon@localhost")
+    return await connect_robust("amqp://guest:guest@talkanon")
 
 
 @app.on_event("startup")
