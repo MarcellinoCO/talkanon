@@ -4,6 +4,8 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from aio_pika import connect_robust
+
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 
@@ -23,6 +25,20 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+async def get_rabbitmq_connection():
+    return await connect_robust("amqp://talkanon:talkanon@localhost")
+
+
+@app.on_event("startup")
+async def startup_event():
+    app.state.rabbitmq_connection = await get_rabbitmq_connection()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await app.state.rabbitmq_connection.close()
 
 
 @app.get("/", response_model=list[schemas.Room])
