@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from aio_pika import connect_robust
+from aio_pika import connect
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -28,7 +28,7 @@ def get_db():
 
 
 async def get_rabbitmq_connection():
-    return await connect_robust("amqp://guest:guest@talkanon")
+    return await connect("amqp://guest:guest@talkanon")
 
 
 @app.on_event("startup")
