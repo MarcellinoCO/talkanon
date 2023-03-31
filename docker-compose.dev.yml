@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  postgres:
+    container_name: talkanon-postgres
+    image: postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/data/postgres
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    networks:
+      - talkanon
+    volumes:
+      - postgres:/data/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: talkanon-pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - 5050:80
+    restart: unless-stopped
+    networks:
+      - talkanon
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
+  backend:
+    container_name: talkanon-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    networks:
+      - talkanon
+    volumes:
+      - ./backend:/code
+
+networks:
+  talkanon:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
