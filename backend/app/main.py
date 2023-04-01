@@ -2,7 +2,7 @@ import json
 
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -72,3 +72,9 @@ async def send_message(room_id: int, content: str, db: Session = Depends(get_db)
     await channel.default_exchange.publish(message, routing_key=f"room_messages")
 
     return "ok"
+
+
+@app.post("/start-worker")
+async def start_worker(background_tasks: BackgroundTasks):
+    background_tasks.add_task(worker.main)
+    return "Worker started"
