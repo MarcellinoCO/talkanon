@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from . import models, schemas
 
@@ -6,13 +7,25 @@ def get_rooms(db: Session):
     return db.query(models.Room).all()
 
 
+def get_rooms(db: Session, minimum_room_id: int):
+    return db.query(models.Room).filter(models.Room.id > minimum_room_id).all()
+
+
 def get_room(db: Session, room_id: int):
-    return db.query(models.Room).filter(models.Room.id == room_id).first()
+    return db.query(models.Room).get(room_id)
 
 
 def create_room(db: Session):
     db_room = models.Room()
     db.add(db_room)
+    db.commit()
+    db.refresh(db_room)
+    return db_room
+
+
+def update_room(db: Session, room_id: int, timestamp: datetime):
+    db_room = db.query(models.Room).get(room_id)
+    db_room.timestamp = timestamp
     db.commit()
     db.refresh(db_room)
     return db_room
