@@ -16,7 +16,8 @@ async def get_rabbitmq_connection():
 
 async def on_message(db, message: IncomingMessage):
     async with message.process():
-        message_data = json.loads(message.body)
+        print("Hello")
+        message_data = json.loads(message.body.decode())
         room_id = message_data["room_id"]
         content = message_data["content"]
 
