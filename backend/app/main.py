@@ -69,7 +69,7 @@ async def send_message(room_id: int, content: str, db: Session = Depends(get_db)
 
     message_data = {"room_id": room_id, "content": content}
     message = Message(json.dumps(message_data).encode())
-    await channel.default_exchange.publish(body=message, routing_key=f"room_{room_id}_queue")
+    await channel.default_exchange.publish(message, routing_key=f"room_{room_id}_queue")
     # queue = await channel.declare_queue(f"room_{room_id}_queue")
     # await queue.publish(Message(json.dumps(message_data).encode()))
 
