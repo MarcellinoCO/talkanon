@@ -6,9 +6,10 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+import asyncio
 from aio_pika import connect, Message
 
-from . import crud, models, schemas
+from . import crud, models, schemas, worker
 from .database import SessionLocal, engine
 
 load_dotenv()
@@ -36,6 +37,7 @@ async def get_rabbitmq_connection():
 @app.on_event("startup")
 async def startup_event():
     app.state.rabbitmq_connection = await get_rabbitmq_connection()
+    asyncio.run(worker.main)
 
 
 @app.on_event("shutdown")
