@@ -36,6 +36,7 @@ async def get_rabbitmq_connection():
 @app.on_event("startup")
 async def startup_event():
     app.state.rabbitmq_connection = await get_rabbitmq_connection()
+    app.state.worker_started = False
 
 
 @app.on_event("shutdown")
@@ -76,5 +77,9 @@ async def send_message(room_id: int, content: str, db: Session = Depends(get_db)
 
 @app.post("/start-worker")
 async def start_worker(background_tasks: BackgroundTasks):
+    if app.state.worker_started:
+        return "Worker already started"
+
     background_tasks.add_task(worker.main)
+    app.state.worker_started = True
     return "Worker started"

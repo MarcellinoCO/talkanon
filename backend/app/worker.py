@@ -12,11 +12,7 @@ from .database import SessionLocal
 app = FastAPI()
 
 
-async def get_rabbitmq_connection():
-    return await connect_robust("amqp://guest:guest@talkanon")
-
-
-async def on_message(db, message: IncomingMessage):
+async def consume_message(db, message: IncomingMessage):
     async with message.process():
         print("Hello")
         message_data = json.loads(message.body.decode())
@@ -29,7 +25,7 @@ async def on_message(db, message: IncomingMessage):
 
 
 async def main():
-    rabbitmq_connection = await get_rabbitmq_connection()
+    rabbitmq_connection = await connect_robust("amqp://guest:guest@talkanon")
 
     async with rabbitmq_connection:
         db = SessionLocal()
@@ -38,7 +34,7 @@ async def main():
         queue_name = "room_messages"
         queue = await channel.declare_queue(queue_name, durable=True)
 
-        await queue.consume(partial(on_message, db))
+        await queue.consume(partial(consume_message, db))
 
         while True:
             await asyncio.sleep(1000)
