@@ -6,6 +6,10 @@ def get_rooms(db: Session):
     return db.query(models.Room).all()
 
 
+def get_room(db: Session, room_id: int):
+    return db.query(models.Room).filter(models.Room.id == room_id).first()
+
+
 def create_room(db: Session):
     db_room = models.Room()
     db.add(db_room)
