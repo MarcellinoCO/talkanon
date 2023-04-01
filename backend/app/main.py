@@ -2,7 +2,7 @@ import json
 
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -66,14 +66,11 @@ async def get_messages(room_id: int, db: Session = Depends(get_db)):
 @app.post("/rooms/{room_id}/messages")
 async def send_message(room_id: int, content: str, db: Session = Depends(get_db)):
     channel = await app.state.rabbitmq_connection.channel()
-    await channel.set_publisher_confirm(True)
 
     message_data = {"room_id": room_id, "content": content}
     message = Message(json.dumps(message_data).encode())
-    confirmation = await channel.default_exchange.publish(message, routing_key=f"room_{room_id}_queue")
+    await channel.default_exchange.publish(message, routing_key=f"room_{room_id}_queue")
+    # queue = await channel.declare_queue(f"room_{room_id}_queue")
+    # await queue.publish(Message(json.dumps(message_data).encode()))
 
-    if confirmation:
-        return "ok"
-    else:
-        raise HTTPException(
-            status_code=500, detail="Failed to publish message to RabbitMQ")
+    return "ok"
