@@ -7,7 +7,7 @@ def get_rooms(db: Session):
     return db.query(models.Room).all()
 
 
-def get_rooms(db: Session, minimum_room_id: int):
+def get_rooms_remaining(db: Session, minimum_room_id: int):
     return db.query(models.Room).filter(models.Room.id > minimum_room_id).all()
 
 
