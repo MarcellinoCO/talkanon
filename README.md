@@ -1,9 +1,12 @@
-# talkanon 🕵️‍♂️💬
+# Talkanon 🕵️‍♂️💬
 Talk to People Anonymously!
 
 Do you want to let your thoughts out into the world without showing your identity? 
-These days, every activity you do online will leave a digital footprint where  
+These days, every activity you do online will leave a digital footprint where it can be stored for a long time.
 With **Talkanon**, you can chat with people worldwide anonymously.
+
+This service runs asynchronously by using RabbitMQ queue, where new messages are stored before consumed by a separate worker thread which saves it to the database.
+The approach makes sure that every message will be recorded in exact chronological order.
 
 
 ## 📌 Instructions
