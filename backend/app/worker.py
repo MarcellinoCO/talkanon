@@ -1,8 +1,10 @@
 import json
-import asyncio
+from functools import partial
 
-from aio_pika import connect_robust, IncomingMessage
 from fastapi import FastAPI
+
+import asyncio
+from aio_pika import connect_robust, IncomingMessage
 
 from . import crud, schemas
 from .database import SessionLocal
@@ -36,7 +38,7 @@ async def main():
         queue_name = "room_messages"
         queue = await channel.declare_queue(queue_name, durable=True)
 
-        await queue.consume(lambda message: on_message(db, message))
+        await queue.consume(partial(on_message, db))
 
         while True:
             await asyncio.sleep(1000)
