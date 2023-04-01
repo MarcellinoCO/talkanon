@@ -65,7 +65,7 @@ async def get_messages(room_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/rooms/{room_id}/messages")
-async def send_message(room_id: int, content: str, db: Session = Depends(get_db)):
+async def send_message(room_id: int, content: str):
     channel = await app.state.rabbitmq_connection.channel()
 
     message_data = {"room_id": room_id, "content": content}
