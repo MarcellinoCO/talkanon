@@ -10,7 +10,7 @@ The approach makes sure that every message will be recorded in exact chronologic
 
 
 ## 📌 Instructions
-Currently, the service is hosted on [34.30.125.161](http://34.30.125.161). Postman collection can be accessed [here](https://api.postman.com/collections/12147807-b65f2a41-d66c-48c7-b6cf-9d4d3ef1e725?access_key=PMAT-01GWY0NKBG8J5TB3NJJWFPRS2J).
+Currently, the service is hosted on [34.30.125.161](http://34.30.125.161). Postman collection can be accessed [here](https://elements.getpostman.com/redirect?entityId=12147807-b65f2a41-d66c-48c7-b6cf-9d4d3ef1e725&entityType=collection).
 
 There are 4 main flows/features in this service:
 
