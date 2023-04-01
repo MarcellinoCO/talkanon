@@ -18,7 +18,7 @@ class Message(MessageBase):
 class Room(BaseModel):
     id: int
     timestamp: datetime
-    items: list[Message] = []
+    messages: list[Message] = []
 
     class Config:
         orm_mode = True
