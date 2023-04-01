@@ -1,43 +1,45 @@
 import json
-
-from sqlalchemy.orm import Session
-
 import asyncio
-import aio_pika
 
-from . import crud
-from .database import SessionManager
-from .main import app
+from aio_pika import connect_robust, IncomingMessage
+from fastapi import FastAPI
+
+from . import crud, schemas
+from .database import SessionLocal
+
+app = FastAPI()
 
 
-async def process_message(db: Session, message: aio_pika.IncomingMessage):
-    with message.process():
+async def get_rabbitmq_connection():
+    return await connect_robust("amqp://guest:guest@talkanon")
+
+
+async def on_message(db, message: IncomingMessage):
+    async with message.process():
         message_data = json.loads(message.body)
         room_id = message_data["room_id"]
         content = message_data["content"]
 
-        message = crud.create_message(db, room_id, content)
-        crud.update_room(db, room_id, message.timestamp)
-
-
-async def update_queues(db: Session, channel: aio_pika.Channel):
-    rooms = await crud.get_rooms_remaining(db, app.state.last_room_id)
-    queues = [await channel.declare_queue(f"room_{room.id}_queue") for room in rooms]
-
-    for queue in queues:
-        await queue.consume(lambda message: process_message(db, message))
-
-    if queues:
-        app.state.last_room_id = max([room.id for room in rooms])
+        message_data = schemas.MessageBase(content=content)
+        created_message = crud.create_message(db, room_id, message_data)
+        crud.update_room(db, room_id, created_message.timestamp)
 
 
 async def main():
-    with SessionManager() as db:
-        channel = await app.state.rabbitmq_connection.channel()
+    rabbitmq_connection = await get_rabbitmq_connection()
 
-        app.state.last_room_id = 0
-        await update_queues(db, channel)
+    async with rabbitmq_connection:
+        db = SessionLocal()
+        channel = await rabbitmq_connection.channel()
+
+        queue_name = "room_messages"
+        queue = await channel.declare_queue(queue_name, durable=True)
+
+        await queue.consume(lambda message: on_message(db, message))
 
         while True:
             await asyncio.sleep(1000)
-            await update_queues(db, channel)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

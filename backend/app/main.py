@@ -6,7 +6,6 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-import asyncio
 from aio_pika import connect, Message
 
 from . import crud, models, schemas, worker
@@ -37,7 +36,6 @@ async def get_rabbitmq_connection():
 @app.on_event("startup")
 async def startup_event():
     app.state.rabbitmq_connection = await get_rabbitmq_connection()
-    asyncio.run(worker.main)
 
 
 @app.on_event("shutdown")
@@ -71,8 +69,6 @@ async def send_message(room_id: int, content: str, db: Session = Depends(get_db)
 
     message_data = {"room_id": room_id, "content": content}
     message = Message(json.dumps(message_data).encode())
-    await channel.default_exchange.publish(message, routing_key=f"room_{room_id}_queue")
-    # queue = await channel.declare_queue(f"room_{room_id}_queue")
-    # await queue.publish(Message(json.dumps(message_data).encode()))
+    await channel.default_exchange.publish(message, routing_key=f"room_messages")
 
     return "ok"
